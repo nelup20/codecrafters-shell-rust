@@ -17,11 +17,22 @@ fn main() {
             cmd if cmd.starts_with("echo") => handle_echo(cmd),
             cmd if cmd.starts_with("exit") => handle_exit(cmd),
             cmd if cmd.starts_with("type") => handle_type(cmd),
+            cmd if cmd.starts_with("cd") => handle_cd(cmd),
             cmd => handle_unknown(cmd),
         }
     }
 }
 
+#[inline(always)]
+fn handle_cd(cmd: &str) {
+    let (_, path) = cmd.split_once(" ").unwrap();
+    match std::env::set_current_dir(path) {
+        Ok(_) => {},
+        Err(_) => eprintln!("cd: {path}: No such file or directory")
+    };
+}
+
+#[inline(always)]
 fn handle_pwd() {
     match std::env::current_dir() {
         Ok(path) => println!("{}", path.display()),
@@ -45,7 +56,7 @@ fn handle_echo(cmd: &str) {
 fn handle_type(cmd: &str) {
     let (_, to_check) = cmd.split_once(" ").unwrap();
     match to_check {
-        "echo" | "exit" | "type" | "pwd" => println!("{to_check} is a shell builtin"),
+        "echo" | "exit" | "type" | "pwd" | "cd" => println!("{to_check} is a shell builtin"),
         _ => match find_in_path(to_check) {
             Some(file_path) => println!("{to_check} is {file_path}"),
             None => println!("{to_check}: not found"),
