@@ -1,6 +1,7 @@
 use std::fs;
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::process::Command;
 
 fn main() {
     loop {
@@ -16,7 +17,7 @@ fn main() {
             cmd if cmd.starts_with("echo") => handle_echo(cmd),
             cmd if cmd.starts_with("exit") => handle_exit(cmd),
             cmd if cmd.starts_with("type") => handle_type(cmd),
-            cmd => handle_unknown(cmd)
+            cmd => handle_unknown(cmd),
         }
     }
 }
@@ -36,28 +37,43 @@ fn handle_echo(cmd: &str) {
 #[inline(always)]
 fn handle_type(cmd: &str) {
     let (_, to_check) = cmd.split_once(" ").unwrap();
-    match to_check { 
+    match to_check {
         "echo" | "exit" | "type" => println!("{to_check} is a shell builtin"),
-        _ => {
-            match std::env::var("PATH") {
-                Ok(paths) => {
-                    for path in paths.split(":") {
-                        let file_path = &format!("{path}/{to_check}");
-                        if fs::exists(file_path).unwrap() {
-                            println!("{to_check} is {file_path}");
-                            return
-                        }
-                    }
-
-                    println!("{to_check}: not found");
-                },
-                Err(_) => println!("PATH environment variable is not set.")
-            }
-        }
+        _ => match find_in_path(to_check) {
+            Some(file_path) => println!("{to_check} is {file_path}"),
+            None => println!("{to_check}: not found"),
+        },
     }
 }
 
 #[inline(always)]
 fn handle_unknown(cmd: &str) {
-    println!("{cmd}: command not found");
+    let (file, args) = cmd.split_once(" ").unwrap_or((cmd, ""));
+    match find_in_path(file) {
+        Some(_) => {
+            Command::new(file)
+                .args(args.split(" "))
+                .spawn()
+                .expect(&format!("Failed to run {cmd}"))
+                .wait()
+                .expect("Child process didn't exit properly");
+        }
+        None => println!("{file}: command not found"),
+    }
+}
+
+fn find_in_path(file: &str) -> Option<String> {
+    match std::env::var("PATH") {
+        Ok(paths) => {
+            for path in paths.split(":") {
+                let file_path = format!("{path}/{file}");
+                if fs::exists(&file_path).unwrap() {
+                    return Some(file_path);
+                }
+            }
+        }
+        Err(_) => println!("PATH environment variable is not set."),
+    }
+
+    None
 }
