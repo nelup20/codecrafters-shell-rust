@@ -9,6 +9,13 @@ fn main() {
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
 
-        println!("{}: command not found", input.trim());
+        let input = input.trim();
+
+        if input.starts_with("exit") {
+            let exit_code = input.split_once(" ").unwrap().1.parse().unwrap();
+            std::process::exit(exit_code);
+        } else {
+            println!("{}: command not found", input.trim());
+        }
     }
 }
