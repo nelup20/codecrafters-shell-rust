@@ -1,5 +1,4 @@
 use std::fs;
-#[allow(unused_imports)]
 use std::io::{self, Write};
 use std::process::Command;
 
@@ -14,11 +13,19 @@ fn main() {
         let input = input.trim();
 
         match input {
+            "pwd" => handle_pwd(),
             cmd if cmd.starts_with("echo") => handle_echo(cmd),
             cmd if cmd.starts_with("exit") => handle_exit(cmd),
             cmd if cmd.starts_with("type") => handle_type(cmd),
             cmd => handle_unknown(cmd),
         }
+    }
+}
+
+fn handle_pwd() {
+    match std::env::current_dir() {
+        Ok(path) => println!("{}", path.display()),
+        Err(err) => eprintln!("{err}")
     }
 }
 
@@ -38,7 +45,7 @@ fn handle_echo(cmd: &str) {
 fn handle_type(cmd: &str) {
     let (_, to_check) = cmd.split_once(" ").unwrap();
     match to_check {
-        "echo" | "exit" | "type" => println!("{to_check} is a shell builtin"),
+        "echo" | "exit" | "type" | "pwd" => println!("{to_check} is a shell builtin"),
         _ => match find_in_path(to_check) {
             Some(file_path) => println!("{to_check} is {file_path}"),
             None => println!("{to_check}: not found"),
