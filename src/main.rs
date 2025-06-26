@@ -26,9 +26,15 @@ fn main() {
 #[inline(always)]
 fn handle_cd(cmd: &str) {
     let (_, path) = cmd.split_once(" ").unwrap();
-    match std::env::set_current_dir(path) {
-        Ok(_) => {},
-        Err(_) => eprintln!("cd: {path}: No such file or directory")
+    let mut path = String::from(path);
+
+    if path.contains("~") {
+        path = path.replace("~", std::env::home_dir().unwrap().to_str().unwrap());
+    }
+
+    match std::env::set_current_dir(&path) {
+        Ok(_) => {}
+        Err(_) => eprintln!("cd: {}: No such file or directory", &path),
     };
 }
 
@@ -36,7 +42,7 @@ fn handle_cd(cmd: &str) {
 fn handle_pwd() {
     match std::env::current_dir() {
         Ok(path) => println!("{}", path.display()),
-        Err(err) => eprintln!("{err}")
+        Err(err) => eprintln!("{err}"),
     }
 }
 
