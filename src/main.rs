@@ -14,6 +14,7 @@ fn main() {
         match input {
             cmd if cmd.starts_with("echo") => handle_echo(cmd),
             cmd if cmd.starts_with("exit") => handle_exit(cmd),
+            cmd if cmd.starts_with("type") => handle_type(cmd),
             cmd => handle_unknown(cmd)
         }
     }
@@ -29,6 +30,15 @@ fn handle_exit(cmd: &str) {
 fn handle_echo(cmd: &str) {
     let (_, to_echo) = cmd.split_once(" ").unwrap();
     println!("{to_echo}");
+}
+
+#[inline(always)]
+fn handle_type(cmd: &str) {
+    let (_, to_check) = cmd.split_once(" ").unwrap();
+    match to_check { 
+        "echo" | "exit" | "type" => println!("{to_check} is a shell builtin"),
+        _ => println!("{to_check}: not found")
+    }
 }
 
 #[inline(always)]
