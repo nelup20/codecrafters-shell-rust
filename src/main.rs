@@ -10,7 +10,8 @@ fn main() {
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
 
-        let input = input.trim();
+        let input = input.trim().replace("''", "");
+        let input = input.as_str();
 
         match input {
             "pwd" => handle_pwd(),
@@ -55,6 +56,13 @@ fn handle_exit(cmd: &str) {
 #[inline(always)]
 fn handle_echo(cmd: &str) {
     let (_, to_echo) = cmd.split_once(" ").unwrap();
+    
+    let to_echo = if to_echo.contains("'") {
+        to_echo.replace("'", "")
+    } else {
+        parse_non_quoted_args(&to_echo).join("")
+    };
+
     println!("{to_echo}");
 }
 
@@ -75,8 +83,14 @@ fn handle_unknown(cmd: &str) {
     let (file, args) = cmd.split_once(" ").unwrap_or((cmd, ""));
     match find_in_path(file) {
         Some(_) => {
+            let args: Vec<String> = if args.contains("'") {
+                args.split("' ").map(|arg| arg.replace("'", "")).collect()
+            } else {
+                parse_non_quoted_args(args)
+            };
+
             Command::new(file)
-                .args(args.split(" "))
+                .args(args)
                 .spawn()
                 .expect(&format!("Failed to run {cmd}"))
                 .wait()
@@ -100,4 +114,11 @@ fn find_in_path(file: &str) -> Option<String> {
     }
 
     None
+}
+
+fn parse_non_quoted_args(args: &str) -> Vec<String> {
+    args.split(" ")
+        .filter(|arg| !arg.trim().is_empty())
+        .map(|arg| arg.to_owned() + " ")
+        .collect()
 }
