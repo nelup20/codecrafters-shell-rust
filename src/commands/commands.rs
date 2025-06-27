@@ -29,4 +29,14 @@ impl Commands {
             Commands::Other(cmd) => cmd
         }
     }
+    
+    pub fn get_delimiter(input: &str) -> &str {
+        if input.starts_with("'") {
+            "' "
+        } else if input.starts_with("\"") {
+            "\" "
+        } else {
+            " "
+        }
+    }
 }
