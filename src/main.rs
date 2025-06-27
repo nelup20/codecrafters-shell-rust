@@ -1,4 +1,5 @@
 mod commands;
+mod streams;
 mod util;
 
 use crate::commands::cd::handle_cd;
@@ -7,9 +8,11 @@ use crate::commands::exit::handle_exit;
 use crate::commands::other::handle_other;
 use crate::commands::pwd::handle_pwd;
 use crate::commands::type_::handle_type;
+use crate::streams::stdout::parse_stdout_redirect;
 use crate::util::args::parse_args;
 use commands::commands::Commands;
-use std::io::{self, Write};
+use std::io;
+use std::io::Write;
 
 fn main() {
     loop {
@@ -27,14 +30,15 @@ fn main() {
         
         let cmd = Commands::from_str(cmd.trim());
         let mut args = parse_args(args);
+        let redirect_file = parse_stdout_redirect(&mut args);
 
         match cmd {
-            Commands::Pwd => handle_pwd(),
-            Commands::Echo => handle_echo(&args),
+            Commands::Pwd => handle_pwd(redirect_file),
+            Commands::Echo => handle_echo(&args, redirect_file),
             Commands::Exit => handle_exit(&mut args),
-            Commands::Type => handle_type(&mut args),
+            Commands::Type => handle_type(&mut args, redirect_file),
             Commands::Cd => handle_cd(&mut args),
-            Commands::Other(file) => handle_other(&file, &args),
+            Commands::Other(file) => handle_other(&file, &args, redirect_file),
         }
     }
 }
