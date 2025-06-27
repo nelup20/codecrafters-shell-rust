@@ -13,6 +13,7 @@ use crate::util::args::parse_args;
 use commands::commands::Commands;
 use std::io;
 use std::io::Write;
+use crate::streams::stderr::parse_stderr_redirect;
 
 fn main() {
     loop {
@@ -30,15 +31,16 @@ fn main() {
         
         let cmd = Commands::from_str(cmd.trim());
         let mut args = parse_args(args);
-        let redirect_file = parse_stdout_redirect(&mut args);
+        let stdout_redirect_file = parse_stdout_redirect(&mut args);
+        let stderr_redirect_file = parse_stderr_redirect(&mut args);
 
         match cmd {
-            Commands::Pwd => handle_pwd(redirect_file),
-            Commands::Echo => handle_echo(&args, redirect_file),
+            Commands::Pwd => handle_pwd(stdout_redirect_file),
+            Commands::Echo => handle_echo(&args, stdout_redirect_file),
             Commands::Exit => handle_exit(&mut args),
-            Commands::Type => handle_type(&mut args, redirect_file),
+            Commands::Type => handle_type(&mut args, stdout_redirect_file),
             Commands::Cd => handle_cd(&mut args),
-            Commands::Other(file) => handle_other(&file, &args, redirect_file),
+            Commands::Other(file) => handle_other(&file, &args, stdout_redirect_file, stderr_redirect_file),
         }
     }
 }

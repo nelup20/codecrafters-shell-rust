@@ -1,9 +1,9 @@
 use std::fs::File;
 
-pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Option<File> {
+pub fn parse_stderr_redirect(args: &mut Vec<String>) -> Option<File> {
     let args_clone = args.clone();
 
-    match args_clone.iter().position(|arg| arg == ">" || arg == "1>") {
+    match args_clone.iter().position(|arg| arg == "2>") {
         Some(index) => {
             args.remove(index);
 
@@ -12,7 +12,7 @@ pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Option<File> {
                     args.remove(index);
                     Some(File::create(file).unwrap())
                 },
-                None => panic!("Invalid stdout redirect: output target missing")
+                None => panic!("Invalid stderr redirect: output target missing")
             }
         },
         None => None
