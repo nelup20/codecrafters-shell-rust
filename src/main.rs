@@ -18,8 +18,13 @@ fn main() {
 
         let mut input = String::new();
         io::stdin().read_line(&mut input).unwrap();
+
+        let delimiter = Commands::get_delimiter(&input);
+        let (mut cmd, args) = input.split_once(delimiter).unwrap_or((&input, ""));
+        if delimiter != " " {
+            cmd = &cmd[1..];
+        }
         
-        let (cmd, args) = input.split_once(" ").unwrap_or((&input, ""));
         let cmd = Commands::from_str(cmd.trim());
         let mut args = parse_args(args);
 
@@ -33,4 +38,3 @@ fn main() {
         }
     }
 }
-
