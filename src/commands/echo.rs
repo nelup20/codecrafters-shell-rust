@@ -1,17 +1,7 @@
-use std::fs::File;
-use std::io::{stdout, Write};
+use std::io::Write;
 
 #[inline(always)]
-pub fn handle_echo(args: &Vec<String>, stdout_file: Option<File>) {
+pub fn handle_echo(args: &Vec<String>, stdout_stream: &mut dyn Write) {
     let to_echo = args.join(" ");
-
-    match stdout_file {
-        None => {
-            writeln!(stdout(), "{to_echo}").unwrap();
-        }
-        
-        Some(mut file) => {
-            writeln!(file, "{to_echo}").unwrap();
-        }
-    }
+    writeln!(stdout_stream, "{to_echo}").unwrap();
 }
