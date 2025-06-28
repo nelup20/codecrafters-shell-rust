@@ -1,0 +1,8 @@
+[KCargo.lock
+Cargo.toml
+README.md
+codecrafters.yml
+something.txt
+src
+target
+your_program.sh

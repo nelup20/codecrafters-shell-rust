@@ -1,3 +1,4 @@
+use crate::streams::stdin::RESET_CURSOR;
 
 #[inline(always)]
 pub fn handle_cd(args: &mut Vec<String>) {
@@ -9,6 +10,7 @@ pub fn handle_cd(args: &mut Vec<String>) {
 
     match std::env::set_current_dir(&path) {
         Ok(_) => {}
-        Err(_) => eprintln!("cd: {}: No such file or directory", &path),
+        // TODO: for whatever reason writing to stderr would output nothing?
+        Err(_) => eprintln!("{RESET_CURSOR}cd: {}: No such file or directory", &path),
     };
 }

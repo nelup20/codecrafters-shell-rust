@@ -1,5 +1,4 @@
 use std::fs::{File, OpenOptions};
-use std::io::Write;
 
 pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Option<File> {
     let args_clone = args.clone();
