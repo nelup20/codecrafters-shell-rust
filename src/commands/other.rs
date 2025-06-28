@@ -1,31 +1,41 @@
 use crate::util::files::find_in_path;
-use std::fs::File;
-use std::process::{Command, Stdio};
+use std::io::Write;
+use std::process::Command;
+use crate::streams::stdin::RESET_CURSOR;
 
 #[inline(always)]
-pub fn handle_other(file: &str, args: &Vec<String>, stdout_file: Option<File>, stderr_file: Option<File>) {
-    let stdout = if stdout_file.is_some() {
-        Stdio::from(stdout_file.unwrap())
-    } else {
-        Stdio::from(std::io::stdout())
-    };
-
-    let stderr = if stderr_file.is_some() {
-        Stdio::from(stderr_file.unwrap())
-    } else {
-        Stdio::from(std::io::stderr())
-    };
-    
+pub fn handle_other(
+    file: &str,
+    args: &Vec<String>,
+    stdout_stream: &mut dyn Write,
+    stderr_stream: &mut dyn Write,
+) {
     match find_in_path(&file) {
         Some(_) => {
-            Command::new(&file)
-                .stdout(stdout)
-                .stderr(stderr)
+            let output = Command::new(&file)
                 .args(args)
-                .spawn()
-                .expect(&format!("Failed to run {}", &file))
-                .wait()
+                .output()
                 .expect("Child process didn't exit properly");
+
+            if !&output.stdout.is_empty() {
+                for char in output.stdout {
+                    stdout_stream.write(&[char]);
+                    if char == '\n' as u8 {
+                        stdout_stream.write(RESET_CURSOR.as_bytes());
+                    }
+                }
+            }
+
+            if !&output.stderr.is_empty() {
+                stderr_stream.write(RESET_CURSOR.as_bytes());
+                
+                for char in output.stderr {
+                    stderr_stream.write(&[char]);
+                    if char == '\n' as u8 {
+                        stderr_stream.write(RESET_CURSOR.as_bytes());
+                    }
+                }
+            }
         }
         None => println!("{file}: command not found"),
     }
