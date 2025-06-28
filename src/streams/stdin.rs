@@ -1,4 +1,5 @@
 use std::io::{Stdin, Stdout, Write};
+use std::ptr::write;
 use termion::cursor::DetectCursorPos;
 use termion::event::Key;
 use termion::input::TermRead;
@@ -24,10 +25,10 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
             Key::Char('\t') => {
                 if input.starts_with("ec") {
                     input = String::from("echo ");
-                }
-
-                if input.starts_with("ex") {
+                } else if input.starts_with("ex") {
                     input = String::from("exit ");
+                } else {
+                    write!(stdout, "\x07").unwrap();
                 }
             }
 
