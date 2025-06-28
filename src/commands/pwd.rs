@@ -1,18 +1,9 @@
-use std::fs::File;
-use std::io::{stdout, Write};
+use std::io::Write;
 
 #[inline(always)]
-pub fn handle_pwd(stdout_file: Option<File>) {
+pub fn handle_pwd(stdout_stream: &mut dyn Write) {
     match std::env::current_dir() {
-        Ok(path) => match stdout_file {
-            None => {
-                writeln!(stdout(), "{}", path.display()).unwrap();
-            }
-
-            Some(mut file) => {
-                writeln!(file, "{}", path.display()).unwrap();
-            }
-        },
+        Ok(path) => writeln!(stdout_stream, "{}", path.display()).unwrap(),
         Err(err) => eprintln!("{err}"),
     }
 }
