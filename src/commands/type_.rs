@@ -9,8 +9,8 @@ pub fn handle_type(args: &mut Vec<String>, mut stdout_stream: Box<dyn Write>) {
     match to_check {
         Commands::Other(file) => match find_in_path(&file) {
             Some(file_path) => writeln!(stdout_stream, "{RESET_CURSOR}{file} is {file_path}").unwrap(),
-            None => writeln!(stdout_stream, "{file}: not found").unwrap(),
+            None => writeln!(stdout_stream, "{RESET_CURSOR}{file}: not found").unwrap(),
         },
-        _ => println!("{} is a shell builtin", to_check.as_str()),
+        _ => println!("{RESET_CURSOR}{} is a shell builtin", to_check.as_str()),
     }
 }

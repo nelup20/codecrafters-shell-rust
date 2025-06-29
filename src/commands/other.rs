@@ -1,7 +1,7 @@
+use crate::streams::stdin::RESET_CURSOR;
 use crate::util::files::find_in_path;
 use std::io::Write;
 use std::process::Command;
-use crate::streams::stdin::RESET_CURSOR;
 
 #[inline(always)]
 pub fn handle_other(
@@ -18,6 +18,8 @@ pub fn handle_other(
                 .expect("Child process didn't exit properly");
 
             if !&output.stdout.is_empty() {
+                stdout_stream.write(RESET_CURSOR.as_bytes());
+
                 for char in output.stdout {
                     stdout_stream.write(&[char]);
                     if char == '\n' as u8 {
@@ -28,7 +30,7 @@ pub fn handle_other(
 
             if !&output.stderr.is_empty() {
                 stderr_stream.write(RESET_CURSOR.as_bytes());
-                
+
                 for char in output.stderr {
                     stderr_stream.write(&[char]);
                     if char == '\n' as u8 {
@@ -37,6 +39,6 @@ pub fn handle_other(
                 }
             }
         }
-        None => println!("{file}: command not found"),
+        None => println!("{RESET_CURSOR}{file}: command not found"),
     }
 }

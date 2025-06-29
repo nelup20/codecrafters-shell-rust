@@ -1,4 +1,4 @@
-use crate::util::files::find_completion_candidate_in_path;
+use crate::util::files::find_completion_candidates_in_path;
 use std::io::{Stdin, Stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -15,6 +15,7 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
     stdout.flush().unwrap();
 
     let mut input = String::new();
+    let mut tab_count = 0;
 
     for key in stdin.keys() {
         match key.unwrap() {
@@ -23,31 +24,47 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
             }
 
             Key::Char('\t') => {
+                tab_count += 1;
+
                 if input.starts_with("ec") {
                     input = String::from("echo ");
                 } else if input.starts_with("ex") {
                     input = String::from("exit ");
                 } else {
-                    match find_completion_candidate_in_path(&input) {
-                        Some(file) => {
-                            input = String::from(file + " ");
-                        },
-                        None => write!(stdout, "{BELL_SOUND}").unwrap(),
+                    let completions = find_completion_candidates_in_path(&input);
+
+                    match completions.len() {
+                        0 => write!(stdout, "{BELL_SOUND}").unwrap(),
+                        1 => input = String::from(completions.first().unwrap().to_owned() + " "),
+                        _ => {
+                            if tab_count == 1 {
+                                write!(stdout, "{BELL_SOUND}").unwrap();
+                            } else {
+                                write!(stdout, "\n").unwrap();
+                                write!(stdout, "{RESET_CURSOR}").unwrap();
+
+                                for exe in completions {
+                                    write!(stdout, "{exe}  ").unwrap();
+                                }
+
+                                write!(stdout, "\n").unwrap();
+                            }
+                        }
                     }
                 }
             }
 
             Key::Char(char) => {
+                tab_count = 0;
                 input.push(char);
             }
-            _ => {}
+            _ => tab_count = 0,
         }
 
         reprint_current_line(stdout, &input);
     }
 
     write!(stdout, "\n").unwrap();
-    write!(stdout, "{RESET_CURSOR}").unwrap();
     input
 }
 

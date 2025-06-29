@@ -18,7 +18,9 @@ pub fn find_in_path(file: &str) -> Option<String> {
     None
 }
 
-pub fn find_completion_candidate_in_path(file: &str) -> Option<String> {
+pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    
     match std::env::var("PATH") {
         Ok(paths) => {
             for path in paths.split(":") {
@@ -27,25 +29,29 @@ pub fn find_completion_candidate_in_path(file: &str) -> Option<String> {
                         for dir_entry in dir {
                             match dir_entry {
                                 Ok(entry) => {
-                                    if entry.file_name().to_str()?.starts_with(file)
+                                    let file_name = String::from(entry.file_name().to_str().unwrap());
+                                    
+                                    if file_name.starts_with(file)
                                         && entry.metadata().unwrap().is_file()
-                                        && file_has_execute_permission(entry.path().to_str()?)
+                                        && file_has_execute_permission(entry.path().to_str().unwrap())
+                                        && !result.contains(&file_name)
                                     {
-                                        return Some(String::from(entry.file_name().to_str()?));
+                                        result.push(file_name);
                                     }
                                 }
                                 Err(err) => eprintln!("{RESET_CURSOR}Error with dir_entry: {err}")
                             }
                         }
                     }
-                    Err(err) => eprintln!("{RESET_CURSOR}Error reading dir with path: {path}. Error: {err}")
+                    Err(_) => {}
                 }
             }
         }
         Err(_) => println!("PATH environment variable is not set."),
     }
 
-    None
+    result.sort();
+    result
 }
 
 #[inline(always)]
