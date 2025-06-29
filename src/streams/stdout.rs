@@ -1,33 +1,30 @@
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
+use std::io::Write;
 
-pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Option<File> {
-    let args_clone = args.clone();
+const REDIRECT_OPERATORS: [&str; 4] = [">", "1>", ">>", "1>>"];
 
-    match args_clone
+pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Box<dyn Write> {
+    match args
         .iter()
-        .position(|arg| arg == ">" || arg == "1>" || arg == ">>" || arg == "1>>")
+        .position(|arg| REDIRECT_OPERATORS.contains(&&**arg))
     {
         Some(index) => {
-            let operator = args_clone.get(index).unwrap();
-            let should_append = operator == ">>" || operator == "1>>";
+            let operator = args.get(index).unwrap();
+            let should_append = operator.contains(">>");
             args.remove(index);
 
-            match args_clone.get(index + 1) {
-                Some(file) => {
-                    args.remove(index);
+            let file = args.get(index).unwrap().clone();
+            args.remove(index);
 
-                    Some(
-                        OpenOptions::new()
-                            .write(true)
-                            .append(should_append)
-                            .create(true)
-                            .open(file)
-                            .unwrap(),
-                    )
-                }
-                None => panic!("Invalid stdout redirect: output target missing"),
-            }
+            Box::new(
+                OpenOptions::new()
+                    .write(true)
+                    .append(should_append)
+                    .create(true)
+                    .open(file)
+                    .unwrap(),
+            )
         }
-        None => None,
+        None => Box::new(std::io::stdout()),
     }
 }

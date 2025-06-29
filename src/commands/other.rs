@@ -7,8 +7,8 @@ use crate::streams::stdin::RESET_CURSOR;
 pub fn handle_other(
     file: &str,
     args: &Vec<String>,
-    stdout_stream: &mut dyn Write,
-    stderr_stream: &mut dyn Write,
+    mut stdout_stream: Box<dyn Write>,
+    mut stderr_stream: Box<dyn Write>,
 ) {
     match find_in_path(&file) {
         Some(_) => {
