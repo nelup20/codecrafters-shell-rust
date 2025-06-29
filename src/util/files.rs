@@ -18,7 +18,8 @@ pub fn find_in_path(file: &str) -> Option<String> {
     None
 }
 
-// TODO: save binaries found in PATH at startup instead of checking every time 
+// TODO: save binaries found in PATH at startup instead of checking every time
+// Also maybe implement Trie since existing crates weren't that great/ergonomic
 pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
     let mut result = Vec::new();
 
@@ -52,6 +53,28 @@ pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
     }
 
     result.sort();
+    result
+}
+
+pub fn find_partial_completion(input: &Vec<String>) -> String {
+    let mut result = String::new();
+
+    if !input.is_empty() {
+        let shortest_cmd = input.first().unwrap();
+        let mut all_contain_shortest = true;
+
+        for command in input {
+            if !command.contains(shortest_cmd) {
+                all_contain_shortest = false;
+                break
+            }
+        }
+
+        if all_contain_shortest {
+            result = shortest_cmd.clone();
+        }
+    }
+
     result
 }
 
