@@ -1,6 +1,5 @@
+use crate::util::files::find_completion_candidate_in_path;
 use std::io::{Stdin, Stdout, Write};
-use std::ptr::write;
-use termion::cursor::DetectCursorPos;
 use termion::event::Key;
 use termion::input::TermRead;
 use termion::raw::RawTerminal;
@@ -8,6 +7,7 @@ use termion::raw::RawTerminal;
 // Note: can't use termion's stdout.cursor_pos() because it panics when running in Codecrafter's tests/containers.
 // Manually setting cursor_pos was a huge pain/error-prone, so I opted for ANSI escape codes instead.
 pub const RESET_CURSOR: &'static str = "\r\x1b[K";
+const BELL_SOUND: &'static str = "\x07";
 
 pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -> String {
     write!(stdout, "{RESET_CURSOR}").unwrap();
@@ -28,7 +28,12 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
                 } else if input.starts_with("ex") {
                     input = String::from("exit ");
                 } else {
-                    write!(stdout, "\x07").unwrap();
+                    match find_completion_candidate_in_path(&input) {
+                        Some(file) => {
+                            input = String::from(file + " ");
+                        },
+                        None => write!(stdout, "{BELL_SOUND}").unwrap(),
+                    }
                 }
             }
 

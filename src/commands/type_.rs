@@ -4,7 +4,7 @@ use std::io::Write;
 use crate::streams::stdin::RESET_CURSOR;
 
 #[inline(always)]
-pub fn handle_type(args: &mut Vec<String>, stdout_stream: &mut dyn Write) {
+pub fn handle_type(args: &mut Vec<String>, mut stdout_stream: Box<dyn Write>) {
     let to_check = Commands::from_str(args.pop().unwrap().as_str());
     match to_check {
         Commands::Other(file) => match find_in_path(&file) {

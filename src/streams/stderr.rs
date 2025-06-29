@@ -1,33 +1,25 @@
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
+use std::io::Write;
 
-pub fn parse_stderr_redirect(args: &mut Vec<String>) -> Option<File> {
-    let args_clone = args.clone();
-
-    match args_clone
-        .iter()
-        .position(|arg| arg == "2>" || arg == "2>>")
-    {
+pub fn parse_stderr_redirect(args: &mut Vec<String>) -> Box<dyn Write> {
+    match args.iter().position(|arg| arg == "2>" || arg == "2>>") {
         Some(index) => {
-            let operator = args_clone.get(index).unwrap();
+            let operator = args.get(index).unwrap();
             let should_append = operator == "2>>";
             args.remove(index);
 
-            match args_clone.get(index + 1) {
-                Some(file) => {
-                    args.remove(index);
+            let file = args.get(index).unwrap().clone();
+            args.remove(index);
 
-                    Some(
-                        OpenOptions::new()
-                            .write(true)
-                            .append(should_append)
-                            .create(true)
-                            .open(file)
-                            .unwrap(),
-                    )
-                }
-                None => panic!("Invalid stderr redirect: output target missing"),
-            }
+            Box::new(
+                OpenOptions::new()
+                    .write(true)
+                    .append(should_append)
+                    .create(true)
+                    .open(file)
+                    .unwrap(),
+            )
         }
-        None => None,
+        None => Box::new(std::io::stderr()),
     }
 }

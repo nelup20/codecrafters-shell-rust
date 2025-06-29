@@ -13,7 +13,6 @@ use crate::streams::stdin::get_input_from_raw_mode;
 use crate::streams::stdout::parse_stdout_redirect;
 use crate::util::args::parse_args;
 use commands::commands::Commands;
-use std::io::Write;
 use termion::raw::IntoRawMode;
 
 fn main() {
@@ -32,19 +31,8 @@ fn main() {
         let cmd = Commands::from_str(cmd.trim());
         let mut args = parse_args(args);
 
-        let stdout_redirect_file = parse_stdout_redirect(&mut args);
-        let stdout_stream: &mut dyn Write = if stdout_redirect_file.is_some() {
-            &mut stdout_redirect_file.as_ref().unwrap()
-        } else {
-            &mut std::io::stdout()
-        };
-        
-        let stderr_redirect_file = parse_stderr_redirect(&mut args);
-        let stderr_stream: &mut dyn Write = if stderr_redirect_file.is_some() {
-            &mut stderr_redirect_file.as_ref().unwrap()
-        } else {
-            &mut std::io::stderr()
-        };
+        let stdout_stream = parse_stdout_redirect(&mut args);
+        let stderr_stream = parse_stderr_redirect(&mut args);
         
         match cmd {
             Commands::Pwd => handle_pwd(stdout_stream),
