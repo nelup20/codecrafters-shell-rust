@@ -1,4 +1,4 @@
-use crate::util::files::find_completion_candidates_in_path;
+use crate::util::files::{find_completion_candidates_in_path, find_partial_completion};
 use std::io::{Stdin, Stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
@@ -15,7 +15,6 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
     stdout.flush().unwrap();
 
     let mut input = String::new();
-    let mut tab_count = 0;
 
     for key in stdin.keys() {
         match key.unwrap() {
@@ -24,8 +23,6 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
             }
 
             Key::Char('\t') => {
-                tab_count += 1;
-
                 if input.starts_with("ec") {
                     input = String::from("echo ");
                 } else if input.starts_with("ex") {
@@ -37,9 +34,10 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
                         0 => write!(stdout, "{BELL_SOUND}").unwrap(),
                         1 => input = String::from(completions.first().unwrap().to_owned() + " "),
                         _ => {
-                            if tab_count == 1 {
-                                write!(stdout, "{BELL_SOUND}").unwrap();
-                            } else {
+                            write!(stdout, "{BELL_SOUND}").unwrap();
+                            let partial_completion = find_partial_completion(&completions);
+
+                            if partial_completion.is_empty() {
                                 write!(stdout, "\n").unwrap();
                                 write!(stdout, "{RESET_CURSOR}").unwrap();
 
@@ -48,6 +46,8 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
                                 }
 
                                 write!(stdout, "\n").unwrap();
+                            } else {
+                                input = partial_completion;
                             }
                         }
                     }
@@ -55,10 +55,9 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
             }
 
             Key::Char(char) => {
-                tab_count = 0;
                 input.push(char);
             }
-            _ => tab_count = 0,
+            _ => {},
         }
 
         reprint_current_line(stdout, &input);
