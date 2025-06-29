@@ -18,9 +18,10 @@ pub fn find_in_path(file: &str) -> Option<String> {
     None
 }
 
+// TODO: save binaries found in PATH at startup instead of checking every time 
 pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
     let mut result = Vec::new();
-    
+
     match std::env::var("PATH") {
         Ok(paths) => {
             for path in paths.split(":") {
@@ -30,7 +31,7 @@ pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
                             match dir_entry {
                                 Ok(entry) => {
                                     let file_name = String::from(entry.file_name().to_str().unwrap());
-                                    
+
                                     if file_name.starts_with(file)
                                         && entry.metadata().unwrap().is_file()
                                         && file_has_execute_permission(entry.path().to_str().unwrap())
