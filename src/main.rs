@@ -39,7 +39,7 @@ fn main() {
             Commands::Echo => handle_echo(&args, stdout_stream),
             Commands::Exit => handle_exit(&mut args),
             Commands::Type => handle_type(&mut args, stdout_stream),
-            Commands::Cd => handle_cd(&mut args),
+            Commands::Cd => handle_cd(&mut args, stderr_stream),
             Commands::Other(file) => {
                 handle_other(&file, &args, stdout_stream, stderr_stream)
             }

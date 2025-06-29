@@ -2,7 +2,6 @@ const DOUBLE_QUOTES_ESCAPE_CHARS: [char; 2] = ['\"', '\\'];
 const SINGLE_QUOTES_ESCAPE_CHARS: [char; 1] = ['\''];
 const OUTSIDE_QUOTES_ESCAPE_CHARS: [char; 4] = [' ', '\'', '\"', '\\'];
 
-// .·°՞(っ-ᯅ-ς)՞°·. (╥﹏╥) ಥ﹏ಥ ⠀⠀⠀
 pub fn parse_args(args: &str) -> Vec<String> {
     let mut result = Vec::new();
     let mut is_inside_double_quotes = false;
