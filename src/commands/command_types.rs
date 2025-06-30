@@ -1,12 +1,12 @@
 use crate::commands::builtin_commands::BuiltinCommands;
-use crate::commands::command_types::CommandTypes::External;
+use crate::commands::command_types::CommandType::External;
 
-pub enum CommandTypes {
+pub enum CommandType {
     Builtin(BuiltinCommands),
     External(String),
 }
 
-impl CommandTypes {
+impl CommandType {
     pub fn from_str(input: &str) -> Self {
         match input {
             "pwd" | "echo" | "exit" | "type" | "cd" => {

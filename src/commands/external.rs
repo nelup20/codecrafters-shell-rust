@@ -4,7 +4,7 @@ use crate::util::files::find_in_path;
 use std::io::Write;
 
 #[inline(always)]
-pub fn handle_other(command: &mut Command) {
+pub fn handle_external(command: &mut Command) {
     let file = command.command_type.as_str();
     match find_in_path(file) {
         Some(_) => {

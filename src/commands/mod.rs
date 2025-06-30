@@ -5,7 +5,7 @@ pub mod exit;
 pub mod echo;
 // can't name it "type"
 pub mod type_;
-pub mod other;
+pub mod external;
 pub mod command_types;
 pub mod input;
 pub mod command;

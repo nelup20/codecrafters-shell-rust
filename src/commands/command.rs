@@ -1,11 +1,11 @@
-use crate::commands::command_types::CommandTypes;
+use crate::commands::command_types::CommandType;
 use crate::commands::input::parse_input;
 use crate::streams::stderr::parse_stderr_redirect;
 use crate::streams::stdout::parse_stdout_redirect;
 use std::io::Write;
 
 pub struct Command {
-    pub command_type: CommandTypes,
+    pub command_type: CommandType,
     pub args: Vec<String>,
     pub stdout_stream: Box<dyn Write>,
     pub stderr_stream: Box<dyn Write>,
@@ -24,7 +24,7 @@ impl Command {
             let stderr_stream = parse_stderr_redirect(&mut args);
 
             let command = Command {
-                command_type: CommandTypes::from_str(&sub_command[0]),
+                command_type: CommandType::from_str(&sub_command[0]),
                 stdout_stream,
                 stderr_stream,
                 args,
