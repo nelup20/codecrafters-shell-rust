@@ -2,7 +2,7 @@ const DOUBLE_QUOTES_ESCAPE_CHARS: [char; 2] = ['\"', '\\'];
 const SINGLE_QUOTES_ESCAPE_CHARS: [char; 1] = ['\''];
 const OUTSIDE_QUOTES_ESCAPE_CHARS: [char; 4] = [' ', '\'', '\"', '\\'];
 
-pub fn parse_args(args: &str) -> Vec<String> {
+pub fn parse_input(args: &str) -> Vec<String> {
     let mut result = Vec::new();
     let mut is_inside_double_quotes = false;
     let mut is_inside_single_quotes = false;
@@ -97,72 +97,72 @@ mod tests {
 
     #[test]
     fn parses_unescaped_single_quotes() {
-        assert_eq!(vec!["some item"], parse_args("\'some item\'"));
+        assert_eq!(vec!["some item"], parse_input("\'some item\'"));
     }
 
     #[test]
     fn parses_unescaped_double_quotes() {
-        assert_eq!(vec!["some item"], parse_args("\"some item\""));
+        assert_eq!(vec!["some item"], parse_input("\"some item\""));
     }
 
     #[test]
     fn parses_escaped_single_quotes() {
-        assert_eq!(vec!["\'some", "item\'"], parse_args("\\\'some item\\\'"));
+        assert_eq!(vec!["\'some", "item\'"], parse_input("\\\'some item\\\'"));
     }
 
     #[test]
     fn parses_escaped_double_quotes() {
-        assert_eq!(vec!["\"some", "item\""], parse_args("\\\"some item\\\""));
+        assert_eq!(vec!["\"some", "item\""], parse_input("\\\"some item\\\""));
     }
 
     #[test]
     fn parses_literal_backslashes_within_single_quotes_1() {
-        assert_eq!(vec!["some\\\\\\item"], parse_args("\'some\\\\\\item\'"));
+        assert_eq!(vec!["some\\\\\\item"], parse_input("\'some\\\\\\item\'"));
     }
 
     #[test]
     fn parses_literal_backslashes_within_single_quotes_2() {
         assert_eq!(
             vec!["some\\\"test\\\"item"],
-            parse_args("\'some\\\"test\\\"item\'")
+            parse_input("\'some\\\"test\\\"item\'")
         );
     }
 
     #[test]
     fn parses_escaped_backslashes_within_double_quotes() {
-        assert_eq!(vec!["some\\item"], parse_args("\"some\\\\item\""));
+        assert_eq!(vec!["some\\item"], parse_input("\"some\\\\item\""));
     }
 
     #[test]
     fn parses_escaped_double_quotes_within_double_quotes() {
-        assert_eq!(vec!["some\"item"], parse_args("\"some\\\"item\""));
+        assert_eq!(vec!["some\"item"], parse_input("\"some\\\"item\""));
     }
 
     #[test]
     fn parses_backslash_with_non_escaped_chars_within_double_quotes() {
-        assert_eq!(vec!["\\5\\o"], parse_args("\"\\5\\o\""));
+        assert_eq!(vec!["\\5\\o"], parse_input("\"\\5\\o\""));
     }
 
     #[test]
     fn parses_backslash_with_non_escaped_chars_within_single_quotes() {
-        assert_eq!(vec!["\\5\\o"], parse_args("\'\\5\\o\'"));
+        assert_eq!(vec!["\\5\\o"], parse_input("\'\\5\\o\'"));
     }
 
     #[test]
     fn parses_backslash_with_non_escaped_chars_outside_of_quotes() {
-        assert_eq!(vec!["5o"], parse_args("\\5\\o"));
+        assert_eq!(vec!["5o"], parse_input("\\5\\o"));
     }
 
     #[test]
     fn parses_backslash_with_single_quote_within_double_quotes() {
-        assert_eq!(vec!["\\23\\'"], parse_args("\"\\23\\'\""));
+        assert_eq!(vec!["\\23\\'"], parse_input("\"\\23\\'\""));
     }
 
     #[test]
     fn parses_escaped_and_unescaped_double_quotes() {
         assert_eq!(
             vec!["some item", "\"another", "item\""],
-            parse_args("\"some item\" \\\"another item\\\"")
+            parse_input("\"some item\" \\\"another item\\\"")
         );
     }
 }

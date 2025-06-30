@@ -1,8 +1,9 @@
+use crate::commands::command::Command;
 use crate::streams::stdin::RESET_CURSOR;
 use std::io::Write;
 
 #[inline(always)]
-pub fn handle_echo(args: &Vec<String>, mut stdout_stream: Box<dyn Write>) {
-    let to_echo = args.join(" ");
-    writeln!(stdout_stream, "{RESET_CURSOR}{to_echo}").unwrap();
+pub fn handle_echo(command: &mut Command) {
+    let to_echo = command.args.join(" ");
+    writeln!(command.stdout_stream, "{RESET_CURSOR}{to_echo}").unwrap();
 }
