@@ -1,40 +1,52 @@
-use crate::commands::command::Command;
-use crate::streams::stdin::RESET_CURSOR;
 use crate::util::files::find_in_path;
-use std::io::Write;
+use std::process::Stdio;
+use crate::commands::command::Command;
+use crate::streams::stderr::ErrorStream;
+use crate::streams::stdin::InputStream;
+use crate::streams::stdout::OutputStream;
 
 #[inline(always)]
-pub fn handle_external(command: &mut Command) {
-    let file = command.command_type.as_str();
-    match find_in_path(file) {
+pub fn handle_external(command: Command) {
+    let executable = command.command_type.as_str();
+    
+    match find_in_path(executable) {
         Some(_) => {
-            let output = std::process::Command::new(&file)
-                .args(&command.args)
-                .output()
-                .expect("Child process didn't exit properly");
+            let mut child_process = std::process::Command::new(executable);
+            child_process.args(command.args);
 
-            if !&output.stdout.is_empty() {
-                &command.stdout_stream.write(RESET_CURSOR.as_bytes());
-
-                for char in output.stdout {
-                    &command.stdout_stream.write(&[char]);
-                    if char == '\n' as u8 {
-                        &command.stdout_stream.write(RESET_CURSOR.as_bytes());
-                    }
+            match command.stdin_stream {
+                InputStream::Pipe(pipe) => {
+                    child_process.stdin(Stdio::from(pipe));
                 }
+
+                InputStream::Stdin => {}
             }
 
-            if !&output.stderr.is_empty() {
-                &command.stderr_stream.write(RESET_CURSOR.as_bytes());
+            match command.stderr_stream {
+                ErrorStream::File(file) => {
+                    child_process.stderr(Stdio::from(file));
+                }
+                ErrorStream::Stderr => {}
+            }
 
-                for char in output.stderr {
-                    &command.stderr_stream.write(&[char]);
-                    if char == '\n' as u8 {
-                        &command.stderr_stream.write(RESET_CURSOR.as_bytes());
-                    }
+            match command.stdout_stream {
+                OutputStream::File(file) => {
+                    child_process.stdout(Stdio::from(file));
+                    child_process.spawn().unwrap().wait().unwrap();
+                }
+
+                OutputStream::Pipe(pipe) => {
+                    child_process.stdout(Stdio::from(pipe));
+                    std::thread::spawn(move || {
+                        child_process.spawn().unwrap().wait().unwrap();
+                    });
+                }
+
+                OutputStream::Stdout => {
+                    child_process.spawn().unwrap().wait().unwrap();
                 }
             }
         }
-        None => println!("{RESET_CURSOR}{file}: command not found"),
+        None => println!("{executable}: command not found"),
     }
 }

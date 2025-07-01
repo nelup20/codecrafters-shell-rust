@@ -3,7 +3,7 @@ pub enum BuiltinCommands {
     Echo,
     Exit,
     Type,
-    Cd
+    Cd,
 }
 
 impl BuiltinCommands {
@@ -14,10 +14,12 @@ impl BuiltinCommands {
             "exit" => Self::Exit,
             "type" => Self::Type,
             "cd" => Self::Cd,
-            _ => { unreachable!() },
+            _ => {
+                unreachable!()
+            }
         }
     }
-    
+
     pub fn as_str(&self) -> &str {
         match self {
             BuiltinCommands::Pwd => "pwd",

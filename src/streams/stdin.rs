@@ -1,15 +1,23 @@
 use crate::util::files::{find_completion_candidates_in_path, find_partial_completion};
-use std::io::{Stdin, Stdout, Write};
+use std::io::{stdin, stdout, PipeReader, Stdout, Write};
 use termion::event::Key;
 use termion::input::TermRead;
-use termion::raw::RawTerminal;
+use termion::raw::{IntoRawMode, RawTerminal};
 
 // Note: can't use termion's stdout.cursor_pos() because it panics when running in Codecrafter's tests/containers.
 // Manually setting cursor_pos was a huge pain/error-prone, so I opted for ANSI escape codes instead.
-pub const RESET_CURSOR: &'static str = "\r\x1b[K";
+const RESET_CURSOR: &'static str = "\r\x1b[K";
 const BELL_SOUND: &'static str = "\x07";
 
-pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -> String {
+pub enum InputStream {
+    Pipe(PipeReader),
+    Stdin
+}
+
+pub fn get_input_from_raw_mode() -> String {
+    let stdin = stdin();
+    let mut stdout = stdout().into_raw_mode().unwrap();
+
     write!(stdout, "{RESET_CURSOR}").unwrap();
     write!(stdout, "$ ").unwrap();
     stdout.flush().unwrap();
@@ -57,12 +65,13 @@ pub fn get_input_from_raw_mode(stdin: Stdin, stdout: &mut RawTerminal<Stdout>) -
             Key::Char(char) => {
                 input.push(char);
             }
-            _ => {},
+            _ => {}
         }
 
-        reprint_current_line(stdout, &input);
+        reprint_current_line(&mut stdout, &input);
     }
 
+    stdout.suspend_raw_mode().unwrap();
     write!(stdout, "\n").unwrap();
     input
 }

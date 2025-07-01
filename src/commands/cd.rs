@@ -1,9 +1,8 @@
 use crate::commands::command::Command;
-use crate::streams::stdin::RESET_CURSOR;
 use std::io::Write;
 
 #[inline(always)]
-pub fn handle_cd(command: &mut Command) {
+pub fn handle_cd(mut command: Command) {
     let mut path = command.args.pop().unwrap();
 
     if path.contains("~") {
@@ -14,8 +13,8 @@ pub fn handle_cd(command: &mut Command) {
         Ok(_) => {}
         Err(_) => {
             writeln!(
-                command.stderr_stream,
-                "{RESET_CURSOR}cd: {}: No such file or directory",
+                command.stderr_stream.as_writer(),
+                "cd: {}: No such file or directory",
                 &path
             )
             .unwrap();

@@ -12,25 +12,21 @@ use crate::commands::pwd::handle_pwd;
 use crate::commands::type_::handle_type;
 use crate::streams::stdin::get_input_from_raw_mode;
 use commands::builtin_commands::BuiltinCommands;
-use termion::raw::IntoRawMode;
 
 fn main() {
     loop {
-        let stdin = std::io::stdin();
-        let mut stdout = std::io::stdout().into_raw_mode().unwrap();
-
-        let input = get_input_from_raw_mode(stdin, &mut stdout);
+        let input = get_input_from_raw_mode();
         let commands = Command::parse_commands(&input);
         
-        for mut command in commands {
+        for command in commands {
             match &command.command_type {
-                CommandType::External(_) => handle_external(&mut command),
+                CommandType::External(_) => handle_external(command),
                 CommandType::Builtin(cmd) => match cmd {
-                    BuiltinCommands::Pwd => handle_pwd(&mut command),
-                    BuiltinCommands::Echo => handle_echo(&mut command),
-                    BuiltinCommands::Exit => handle_exit(&mut command),
-                    BuiltinCommands::Type => handle_type(&mut command),
-                    BuiltinCommands::Cd => handle_cd(&mut command),
+                    BuiltinCommands::Pwd => handle_pwd(command),
+                    BuiltinCommands::Echo => handle_echo(command),
+                    BuiltinCommands::Exit => handle_exit(command),
+                    BuiltinCommands::Type => handle_type(command),
+                    BuiltinCommands::Cd => handle_cd(command),
                 }
             }
         }

@@ -1,6 +1,5 @@
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
-use crate::streams::stdin::RESET_CURSOR;
 
 pub fn find_in_path(file: &str) -> Option<String> {
     match std::env::var("PATH") {
@@ -31,17 +30,20 @@ pub fn find_completion_candidates_in_path(file: &str) -> Vec<String> {
                         for dir_entry in dir {
                             match dir_entry {
                                 Ok(entry) => {
-                                    let file_name = String::from(entry.file_name().to_str().unwrap());
+                                    let file_name =
+                                        String::from(entry.file_name().to_str().unwrap());
 
                                     if file_name.starts_with(file)
                                         && entry.metadata().unwrap().is_file()
-                                        && file_has_execute_permission(entry.path().to_str().unwrap())
+                                        && file_has_execute_permission(
+                                            entry.path().to_str().unwrap(),
+                                        )
                                         && !result.contains(&file_name)
                                     {
                                         result.push(file_name);
                                     }
                                 }
-                                Err(err) => eprintln!("{RESET_CURSOR}Error with dir_entry: {err}")
+                                Err(err) => eprintln!("Error with dir_entry: {err}"),
                             }
                         }
                     }
@@ -66,7 +68,7 @@ pub fn find_partial_completion(input: &Vec<String>) -> String {
         for command in input {
             if !command.contains(shortest_cmd) {
                 all_contain_shortest = false;
-                break
+                break;
             }
         }
 

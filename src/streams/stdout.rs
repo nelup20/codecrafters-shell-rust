@@ -1,9 +1,25 @@
-use std::fs::OpenOptions;
-use std::io::Write;
+use std::fs::{File, OpenOptions};
+use std::io::{stdout, PipeWriter, Write};
 
 const REDIRECT_OPERATORS: [&str; 4] = [">", "1>", ">>", "1>>"];
 
-pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Box<dyn Write> {
+pub enum OutputStream {
+    File(File),
+    Pipe(PipeWriter),
+    Stdout
+}
+
+impl OutputStream {
+    pub fn as_writer(&self) -> Box<dyn Write + '_> {
+        match self {
+            Self::File(file) => Box::new(file),
+            Self::Pipe(pipe) => Box::new(pipe),
+            Self::Stdout => Box::new(stdout())
+        }
+    }
+}
+
+pub fn parse_stdout_redirect(args: &mut Vec<String>) -> OutputStream {
     match args
         .iter()
         .position(|arg| REDIRECT_OPERATORS.contains(&&**arg))
@@ -16,7 +32,7 @@ pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Box<dyn Write> {
             let file = args.get(index).unwrap().clone();
             args.remove(index);
 
-            Box::new(
+            OutputStream::File(
                 OpenOptions::new()
                     .write(true)
                     .append(should_append)
@@ -25,6 +41,6 @@ pub fn parse_stdout_redirect(args: &mut Vec<String>) -> Box<dyn Write> {
                     .unwrap(),
             )
         }
-        None => Box::new(std::io::stdout()),
+        None => OutputStream::Stdout,
     }
 }
