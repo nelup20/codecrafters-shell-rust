@@ -9,7 +9,7 @@ pub enum CommandType {
 impl CommandType {
     pub fn from_str(input: &str) -> Self {
         match input {
-            "pwd" | "echo" | "exit" | "type" | "cd" => {
+            "pwd" | "echo" | "exit" | "type" | "cd" | "history" => {
                 Self::Builtin(BuiltinCommands::from_str(input))
             }
             command => External(String::from(command)),

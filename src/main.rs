@@ -12,6 +12,7 @@ use crate::commands::pwd::handle_pwd;
 use crate::commands::type_::handle_type;
 use crate::streams::stdin::get_input_from_raw_mode;
 use commands::builtin_commands::BuiltinCommands;
+use crate::commands::history::handle_history;
 
 fn main() {
     loop {
@@ -27,6 +28,7 @@ fn main() {
                     BuiltinCommands::Exit => handle_exit(command),
                     BuiltinCommands::Type => handle_type(command),
                     BuiltinCommands::Cd => handle_cd(command),
+                    BuiltinCommands::History => handle_history(command),
                 }
             }
         }

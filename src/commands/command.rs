@@ -27,45 +27,45 @@ impl Command {
             .collect();
 
         let (mut pipe_reader, _) = std::io::pipe().unwrap();
-        
+
         for (i, sub_cmd) in sub_commands.iter().enumerate() {
             let command_type = CommandType::from_str(&sub_cmd[0]);
             let mut args = Vec::from(&sub_cmd[1..]);
             let mut stdin_stream = InputStream::Stdin;
             let mut stdout_stream = OutputStream::Stdout;
             let mut stderr_stream = ErrorStream::Stderr;
-            
+
             if i == 0 && sub_commands.len() > 1 {
                 let (reader_for_next_cmd, writer) = std::io::pipe().unwrap();
 
                 stdout_stream = OutputStream::Pipe(writer);
                 pipe_reader = reader_for_next_cmd;
             }
-            
+
             if i != 0 && i != sub_commands.len() - 1 {
                 let (reader_for_next_cmd, writer) = std::io::pipe().unwrap();
-                
+
                 stdin_stream = InputStream::Pipe(pipe_reader);
                 stdout_stream = OutputStream::Pipe(writer);
-                
+
                 pipe_reader = reader_for_next_cmd;
             }
 
             if i == sub_commands.len() - 1 {
                 stdout_stream = parse_stdout_redirect(&mut args);
                 stderr_stream = parse_stderr_redirect(&mut args);
-                
+
                 if sub_commands.len() > 1 {
                     stdin_stream = InputStream::Pipe(pipe_reader.try_clone().unwrap());
                 }
             }
-            
+
             result.push(Command {
                 command_type,
                 args,
                 stdin_stream,
                 stdout_stream,
-                stderr_stream
+                stderr_stream,
             })
         }
 

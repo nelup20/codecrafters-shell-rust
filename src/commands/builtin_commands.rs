@@ -4,6 +4,7 @@ pub enum BuiltinCommands {
     Exit,
     Type,
     Cd,
+    History
 }
 
 impl BuiltinCommands {
@@ -14,6 +15,7 @@ impl BuiltinCommands {
             "exit" => Self::Exit,
             "type" => Self::Type,
             "cd" => Self::Cd,
+            "history" => Self::History,
             _ => {
                 unreachable!()
             }
@@ -27,6 +29,7 @@ impl BuiltinCommands {
             BuiltinCommands::Exit => "exit",
             BuiltinCommands::Type => "type",
             BuiltinCommands::Cd => "cd",
+            BuiltinCommands::History => "history",
         }
     }
 }

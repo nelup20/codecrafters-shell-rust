@@ -9,3 +9,4 @@ pub mod external;
 pub mod command_types;
 pub mod input;
 pub mod command;
+pub mod history;
