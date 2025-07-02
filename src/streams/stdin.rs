@@ -11,10 +11,10 @@ const BELL_SOUND: &'static str = "\x07";
 
 pub enum InputStream {
     Pipe(PipeReader),
-    Stdin
+    Stdin,
 }
 
-pub fn get_input_from_raw_mode() -> String {
+pub fn get_input_from_raw_mode(command_history: &Vec<String>) -> String {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 
@@ -23,11 +23,29 @@ pub fn get_input_from_raw_mode() -> String {
     stdout.flush().unwrap();
 
     let mut input = String::new();
+    let mut command_history_index = command_history.len();
 
     for key in stdin.keys() {
         match key.unwrap() {
             Key::Char('\n') => {
                 break;
+            }
+
+            Key::Up => {
+                if !command_history.is_empty() && command_history_index > 0 {
+                    command_history_index -= 1;
+                    input =
+                        String::from(command_history.get(command_history_index).unwrap().trim());
+                }
+            }
+
+            Key::Down => {
+                if !command_history.is_empty() && command_history_index < command_history.len() - 1
+                {
+                    command_history_index += 1;
+                    input =
+                        String::from(command_history.get(command_history_index).unwrap().trim());
+                }
             }
 
             Key::Char('\t') => {

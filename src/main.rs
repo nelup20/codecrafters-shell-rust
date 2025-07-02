@@ -18,7 +18,7 @@ fn main() {
     let mut command_history: Vec<String> = Vec::new();
     
     loop {
-        let input = get_input_from_raw_mode();
+        let input = get_input_from_raw_mode(&command_history);
         let commands = Command::parse_commands(&input);
         
         for command in commands {
