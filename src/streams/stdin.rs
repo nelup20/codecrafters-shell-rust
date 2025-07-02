@@ -1,3 +1,4 @@
+use crate::commands::history::CommandHistory;
 use crate::util::files::{find_completion_candidates_in_path, find_partial_completion};
 use std::io::{stdin, stdout, PipeReader, Stdout, Write};
 use termion::event::Key;
@@ -14,7 +15,7 @@ pub enum InputStream {
     Stdin,
 }
 
-pub fn get_input_from_raw_mode(command_history: &Vec<String>) -> String {
+pub fn get_input_from_raw_mode(command_history: &CommandHistory) -> String {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
 

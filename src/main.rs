@@ -12,10 +12,10 @@ use crate::commands::pwd::handle_pwd;
 use crate::commands::type_::handle_type;
 use crate::streams::stdin::get_input_from_raw_mode;
 use commands::builtin_commands::BuiltinCommands;
-use crate::commands::history::{add_to_history, handle_history};
+use crate::commands::history::{add_to_history, handle_history, CommandHistory};
 
 fn main() {
-    let mut command_history: Vec<String> = Vec::new();
+    let mut command_history = CommandHistory::new();
     
     loop {
         let input = get_input_from_raw_mode(&command_history);
