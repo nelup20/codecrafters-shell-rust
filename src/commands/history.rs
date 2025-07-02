@@ -42,11 +42,11 @@ impl CommandHistory {
         file.write_all("\n".as_bytes()).unwrap();
     }
 
-    pub fn write_to_history_file(&self, should_append: bool) {
+    pub fn write_to_history_file(&self) {
         match std::env::var("HISTFILE") {
             Err(_) => {}
             Ok(history_file_path) => {
-                self.write_to_file(&history_file_path, should_append);
+                self.write_to_file(&history_file_path, false);
             }
         }
     }
