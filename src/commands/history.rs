@@ -11,9 +11,20 @@ pub struct CommandHistory {
 
 impl CommandHistory {
     pub fn new() -> CommandHistory {
-        CommandHistory {
+        let mut result = CommandHistory {
             history: Vec::new(),
             last_appended_index: 0,
+        };
+
+        match std::env::var("HISTFILE") {
+            Err(_) => result,
+            Ok(history_file_path) => {
+                for line in fs::read_to_string(history_file_path).unwrap().lines() {
+                    result.push(String::from(line));
+                }
+
+                result
+            }
         }
     }
 }
