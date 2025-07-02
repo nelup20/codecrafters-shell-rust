@@ -27,6 +27,29 @@ impl CommandHistory {
             }
         }
     }
+
+    pub fn write_to_file(&self, file: &str, should_append: bool) {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .append(should_append)
+            .create(true)
+            .open(file)
+            .unwrap();
+
+        file.write_all(self[self.last_appended_index..].join("\n").as_bytes())
+            .unwrap();
+
+        file.write_all("\n".as_bytes()).unwrap();
+    }
+
+    pub fn write_to_history_file(&self, should_append: bool) {
+        match std::env::var("HISTFILE") {
+            Err(_) => {}
+            Ok(history_file_path) => {
+                self.write_to_file(&history_file_path, should_append);
+            }
+        }
+    }
 }
 
 impl Deref for CommandHistory {
@@ -62,37 +85,13 @@ pub fn handle_history(command_history: &mut CommandHistory, command: Command) {
 
             "-a" => {
                 let file_path = command.args.get(1).unwrap();
-                let mut file = OpenOptions::new()
-                    .write(false)
-                    .append(true)
-                    .create(true)
-                    .open(file_path)
-                    .unwrap();
-
-                file.write_all(
-                    command_history[command_history.last_appended_index..]
-                        .join("\n")
-                        .as_bytes(),
-                )
-                .unwrap();
-
-                file.write_all("\n".as_bytes()).unwrap();
-
+                command_history.write_to_file(file_path, true);
                 command_history.last_appended_index = command_history.len();
             }
 
             "-w" => {
                 let file_path = command.args.get(1).unwrap();
-                let mut file = OpenOptions::new()
-                    .write(true)
-                    .append(false)
-                    .create(true)
-                    .open(file_path)
-                    .unwrap();
-
-                file.write_all(command_history.join("\n").as_bytes())
-                    .unwrap();
-                file.write_all("\n".as_bytes()).unwrap();
+                command_history.write_to_file(file_path, false);
             }
 
             limit => {
@@ -110,8 +109,11 @@ pub fn handle_history(command_history: &mut CommandHistory, command: Command) {
 pub fn add_to_history(command_history: &mut CommandHistory, command: &Command) {
     let mut line = String::new();
     line.push_str(command.command_type.as_str());
-    line.push_str(" ");
-    line.push_str(&command.args.join(" "));
+
+    if !command.args.is_empty() {
+        line.push_str(" ");
+        line.push_str(&command.args.join(" "));
+    }
 
     command_history.push(line);
 }
