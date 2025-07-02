@@ -32,7 +32,7 @@ fn main() {
                     BuiltinCommands::Exit => handle_exit(command),
                     BuiltinCommands::Type => handle_type(command),
                     BuiltinCommands::Cd => handle_cd(command),
-                    BuiltinCommands::History => handle_history(&command_history, command),
+                    BuiltinCommands::History => handle_history(&mut command_history, command),
                 }
             }
         }
