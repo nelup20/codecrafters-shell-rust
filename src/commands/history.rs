@@ -1,29 +1,37 @@
 use crate::commands::command::Command;
 use std::fs;
+use std::io::BufRead;
 
 #[inline(always)]
-pub fn handle_history(history: &mut Vec<String>, command: Command) {
+pub fn handle_history(command_history: &mut Vec<String>, command: Command) {
     match command.args.first() {
         None => {
-            for (i, line) in history.iter().enumerate() {
+            for (i, line) in command_history.iter().enumerate() {
                 println!("{} {}", i + 1, line)
             }
         }
 
         Some(arg) => match arg.as_str() {
             "-r" => {
-                let file = command.args.get(1).unwrap();
-                for line in fs::read_to_string(file).unwrap().lines() {
-                    history.push(String::from(line));
+                let file_path = command.args.get(1).unwrap();
+                for line in fs::read_to_string(file_path).unwrap().lines() {
+                    command_history.push(String::from(line));
                 }
+            }
+
+            "-w" => {
+                let file_path = command.args.get(1).unwrap();
+                // For the trailing newline
+                command_history.push(String::from(""));
+                fs::write(file_path, command_history.join("\n")).unwrap();
             }
 
             limit => {
                 let limit: usize = limit.parse().unwrap();
-                let history_length = history.len();
+                let history_length = command_history.len();
 
                 for i in (history_length - limit)..history_length {
-                    println!("{} {}", i + 1, history.get(i).unwrap());
+                    println!("{} {}", i + 1, command_history.get(i).unwrap());
                 }
             }
         },
