@@ -1,6 +1,6 @@
 use crate::commands::command::Command;
+use crate::util::files::open_file_to_write;
 use std::fs;
-use std::fs::OpenOptions;
 use std::io::{BufRead, Write};
 use std::ops::{Deref, DerefMut};
 
@@ -29,12 +29,7 @@ impl CommandHistory {
     }
 
     pub fn write_to_file(&self, file: &str, should_append: bool) {
-        let mut file = OpenOptions::new()
-            .write(true)
-            .append(should_append)
-            .create(true)
-            .open(file)
-            .unwrap();
+        let mut file = open_file_to_write(&file, should_append);
 
         file.write_all(self[self.last_appended_index..].join("\n").as_bytes())
             .unwrap();

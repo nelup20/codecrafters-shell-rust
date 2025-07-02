@@ -1,5 +1,15 @@
 use std::fs;
+use std::fs::{File, OpenOptions};
 use std::os::unix::fs::PermissionsExt;
+
+pub fn open_file_to_write(file_path: &str, should_append: bool) -> File {
+    OpenOptions::new()
+        .write(true)
+        .append(should_append)
+        .create(true)
+        .open(file_path)
+        .unwrap()
+}
 
 pub fn find_in_path(file: &str) -> Option<String> {
     match std::env::var("PATH") {

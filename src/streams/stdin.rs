@@ -15,6 +15,10 @@ pub enum InputStream {
     Stdin,
 }
 
+// Personal/Bonus TODOs:
+// - Manual left/right navigation
+// - Backspace/delete char
+// - Insert chars from new cursor position
 pub fn get_input_from_raw_mode(command_history: &CommandHistory) -> String {
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();

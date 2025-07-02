@@ -1,4 +1,5 @@
-use std::fs::{File, OpenOptions};
+use crate::util::files::open_file_to_write;
+use std::fs::File;
 use std::io::{stdout, PipeWriter, Write};
 
 const REDIRECT_OPERATORS: [&str; 4] = [">", "1>", ">>", "1>>"];
@@ -6,7 +7,7 @@ const REDIRECT_OPERATORS: [&str; 4] = [">", "1>", ">>", "1>>"];
 pub enum OutputStream {
     File(File),
     Pipe(PipeWriter),
-    Stdout
+    Stdout,
 }
 
 impl OutputStream {
@@ -14,7 +15,7 @@ impl OutputStream {
         match self {
             Self::File(file) => Box::new(file),
             Self::Pipe(pipe) => Box::new(pipe),
-            Self::Stdout => Box::new(stdout())
+            Self::Stdout => Box::new(stdout()),
         }
     }
 }
@@ -32,14 +33,7 @@ pub fn parse_stdout_redirect(args: &mut Vec<String>) -> OutputStream {
             let file = args.get(index).unwrap().clone();
             args.remove(index);
 
-            OutputStream::File(
-                OpenOptions::new()
-                    .write(true)
-                    .append(should_append)
-                    .create(true)
-                    .open(file)
-                    .unwrap(),
-            )
+            OutputStream::File(open_file_to_write(&file, should_append))
         }
         None => OutputStream::Stdout,
     }

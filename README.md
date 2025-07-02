@@ -1,3 +1,13 @@
+
+Completed extensions:
+- Navigation
+- Quoting
+- Redirection
+- Autocompletion
+- Pipelines
+- History
+- History Persistence
+
 [![progress-banner](https://backend.codecrafters.io/progress/shell/4c14a7d7-3bbd-4629-a2e1-eb5deeb4e808)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
 This is a starting point for Rust solutions to the
